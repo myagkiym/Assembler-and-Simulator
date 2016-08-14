@@ -2,6 +2,7 @@
 #define ASSEMBLER_PRETREATMENT_H_INCLUDED
 
 #include "common.h"
+#include <stdio.h>
 
 /* the max length of the reading buffer*/
 #define MAX_BUF_LEN		100
@@ -12,5 +13,7 @@ typedef struct _Addr{
 	uint32_t		addr;
 	struct _Addr	*next;
 }Addr;
+
+error_t assembler_pretreatment(const char *src, FILE **temp_dst, Error *error);
 
 #endif // ASSEMBLER_PRETREATMENT_H_INCLUDED

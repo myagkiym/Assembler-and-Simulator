@@ -7,6 +7,6 @@
 #define HASH_SEED	0
 /* use the murmurhash3 algorithm */
 /* you can change the hash algorithm without worrying damaging the program */
-uint32_t hash_32(const char *key, uint32_t len, uint32_t seed);
+uint32_t hash_32(const char *key, uint32_t seed);
 
 #endif // MURMURHASH_H_INCLUDED
