@@ -25,23 +25,46 @@ static error_t __get_nth_token(const char *buffer, char *buffer_sub, char n);
 error->error_pos	=	(char)(strstr(buffer,buffer_sub)-buffer);\
 return	error_code;}
 
+/* delete all the comments and empty lines int the source file */
+error_t assembler_pretreatment_stage0(const char *src, const char *dst){
+	/* opening necessary files */
+	FILE *file_src	=	fopen(src, "r");
+	FILE *file_dst	=	fopen(dst, "w");
+	if(!file_src || !file_dst)
+		return error_open_file;
+	/* for analyze the line */
+	char	buffer[MAX_BUF_LEN];
+	char	buffer_sub[MAX_BUF_LEN];
+	char	*temp;
+	for(;fgets(buffer, MAX_BUF_LEN, file_src);){
+		if((temp=strchr(buffer, '#'))!=NULL){
+			*temp	=	'\n';
+			*++temp	=	'\0';
+		}
+		if(__get_nth_token(buffer, buffer_sub, 0)==error_token_not_get);
+		else
+			fputs(buffer, file_dst);
+	}
+	fclose(file_src);
+    fclose(file_dst);
+	return	no_error;
+}
 /* substitute the BYTE, WORD declaration and :LABEL */
 /* returning temp_dst(the temp file of pre-treatment */
-error_t assembler_pretreatment(const char *src, FILE **temp_dst, Error *error){
+error_t assembler_pretreatment_stage1(const char *src, const char *dst, Error *error){
 	/* initialize the address table */
 	for(int i=0; i<HASH_MASK; i++){
 		addr_table[i]		=	malloc(sizeof(Addr));
 		addr_table[i]->next	=	NULL;
 	}
 	/* initialize the temp data stack */
-	memset(data_stack,0,sizeof(uint32)*(1<<24));
+	memset(data_stack,0,sizeof(uint32_t)*(1<<24));
+
 	/* open necessary files */
-	char src_cpy[strlen(src)+2];
-	strcpy(src_cpy,src);
-	FILE *file_src	=	fopen(src,"r");
-	if(!file_src)
+	FILE *file_src	=	fopen(src, "r");
+	FILE *file_dst	=	fopen(dst, "w");
+	if(!file_src || !file_dst)
 		return error_open_file;
-	*temp_dst		=	fopen(strcat(src_cpy,"$"),"w");
 
 	/* store the reading line */
 	char buffer[MAX_BUF_LEN];
@@ -56,10 +79,10 @@ error_t assembler_pretreatment(const char *src, FILE **temp_dst, Error *error){
 	char flag_label		=	0;
 
 	/*** stage one, find the labels and declarations ***/
-	for(; fgets(buffer, MAX_BUF_LEN, file_src); pc_addr+=2){
+	for(; fgets(buffer, MAX_BUF_LEN, file_src)!=NULL; pc_addr+=2){
 		flag_label	=	0;
 		/* if is the empty line */
-		if(__get_nth_token(buffer, buffer_sub, 0)==error_token_not_get || buffer_sub[0]=='#'){
+		if(__get_nth_token(buffer, buffer_sub, 0)==error_token_not_get){
 			pc_addr-=2;
 			continue;	/* next line */
 		}
@@ -84,15 +107,16 @@ error_t assembler_pretreatment(const char *src, FILE **temp_dst, Error *error){
 			if(__get_nth_token(buffer, buffer_sub, flag_label+1)==error_token_not_get)
 				__return_error(error_gramma_lack_symbol);
 
-			/** needs modify **/
 			/* distribute data space */
 			int space	=	0;
 			char *temp	=	strstr(buffer, buffer_sub);
 			/* make sure the symbol is legal */
 			if(isdigit(*temp))
 				__return_error(error_gramma_declare_is_digit);
-			for(; isalnum(temp) || temp=='_'; temp++)
-				buffer_sub	=	*temp;
+			int i=0;
+			for(; isalnum(*temp) || *temp=='_'; temp++, i++)
+				buffer_sub[i]	=	*temp;
+			buffer_sub[i]='\0';
 			/* if the symbol is a keyword */
 			if(strcmp(op_hash[hash_32(buffer_sub, HASH_SEED) & HASH_MASK].name,buffer_sub)==0)
 				__return_error(error_gramma_declare_is_keyword);
@@ -101,7 +125,7 @@ error_t assembler_pretreatment(const char *src, FILE **temp_dst, Error *error){
 				__return_error(error_gramma_duplicate_symbol);
 
 			/* if it is a set */
-			if(__get_nth_token(temp, buffer_sub, 0)==error_token_not_get || buffer_sub	=	'#'){
+			if(__get_nth_token(temp, buffer_sub, 0)==error_token_not_get){
 				space = 1;
 				goto end;
 			}
@@ -109,40 +133,49 @@ error_t assembler_pretreatment(const char *src, FILE **temp_dst, Error *error){
 			if(*temp=='['){
 				temp++;
 				for(; isspace(*temp); temp++);
-				for(temp++ ;isdigit(buffer_sub[i]);i--)
-					space	=	space*10 + buffer_sub[i] - '0';
+				for(temp++ ;isdigit(*temp); temp++)
+					space	=	space*10 + (*temp) - '0';
 				for(; isspace(*temp); temp++);
 				if(*temp != ']')
 					__return_error(error_gramma_declare_incomplete);
+				temp++;
 			}
-			else
-				__return_error(error_gramma_too_much_argument);
 
 			/* if already set the value */
-			if(__get_nth_token(temp, buffer_sub, 0)==error_token_not_get || buffer_sub	=	'#')
+			if(__get_nth_token(temp, buffer_sub, 0)==error_token_not_get)
 				continue;
 			temp	=	strstr(buffer, buffer_sub);
 			if(*temp=='='){
 				temp++;
 				for(; isspace(*temp); temp++);
 				/* if it is a set */
-				if(temp=='{'){
-					int counter=0;
+				if(*temp=='{'){
+					int counter	=	0;
 					uint32_t data;
-					char fmt[MAX_BUF_LEN]=="%d";
-					for(;sscanf(temp,fmt,&data)==1;counter++){
-						data_stack[data_addr+i]==data;
+					char fmt[MAX_BUF_LEN]	=	"%d";
+					for(;sscanf(temp,fmt,&data)==1 && counter<=space ;counter++){
+						data_stack[data_addr+counter]	=	data;
 						fmt[0]	=	'\0';
 						for(int i=0; i<counter; i++)
 							strcat(fmt,"%*d");
 						strcat(fmt,"%d");
 					}
+					/* make the pointer be out of the set */
+					for(; *temp!='}'; temp++);
+					temp++;
 				}
 				/* if it is a string */
-				else if(temp=='"'){
-				/************************ program here ********************************/
+				else if(*temp=='"'){
+					int counter	=	0;
 					temp++;
-					for()
+					for(; *temp!='"' && counter <= space; temp++,counter++)
+						data_stack[data_addr+counter]	=	*temp;
+					temp++;
+				}
+				/* if it's a number */
+				else if(isdigit(*temp)){
+					sscanf(temp, "%u", &data_stack[data_addr]);
+					for(; isdigit(*temp); temp++);
 				}
 				else
 					__return_error(error_gramma_too_less_argument);
@@ -157,38 +190,39 @@ error_t assembler_pretreatment(const char *src, FILE **temp_dst, Error *error){
 				return	error_stack_overflow;
 
 			/* if there's still token after the declaration and it's not comment */
-			if(	__get_nth_token(buffer, buffer_sub, flag_label+2)==no_error	&& buffer_sub[0]!='#'){
+			if(	__get_nth_token(temp, buffer_sub, 0)==no_error){
 				__return_error(error_gramma_duplicate_command);
 			}
 
+			pc_addr	-=	2;
 			continue;	/* next line */
 		}
 		/* if is a keyword (test if the number of token is right ) */
 		if(strcmp(op_hash[hash_32(buffer_sub, HASH_SEED) & HASH_MASK].name,buffer_sub)==0){
 			int num=0, counter=0;
-			switch(op_hash[hash_32(buffer_sub,HASH_SEED) & HASH_MASK].format){
+			switch(op_hash[hash_32(buffer_sub, HASH_SEED) & HASH_MASK].format){
 				case o5_p27:
-					num	=	1;
+					num	=	0;
 					break;
 				case o5_p3_a24:
-				case o5_r3_a24:
 				case o5_r3_p24:
-					num	=	2;
+					num	=	1;
 					break;
+				case o5_r3_a24:
 				case o5_r3_p16_t8:
 				case o5_r3_p8_i16:
 				case o5_r3_r4_p20:
-					num	=	3;
+					num	=	2;
 					break;
 				case o5_r3_r4_r4_p16:
-					num	=	4;
+					num	=	3;
 					break;
 			}
 			/* make sure the number of argument is correct */
 			for(counter=0; counter<num; counter++)
 				if(__get_nth_token(buffer, buffer_sub, flag_label+counter+1)==error_token_not_get)
 					__return_error(error_gramma_too_less_argument);
-			if(__get_nth_token(buffer, buffer_sub,flag_label+counter+1)==no_error && buffer_sub[0]!='#')
+			if(__get_nth_token(buffer, buffer_sub,flag_label+counter+1)==no_error)
 				__return_error(error_gramma_too_much_argument);
 			continue;
 		}
@@ -201,7 +235,7 @@ error_t assembler_pretreatment(const char *src, FILE **temp_dst, Error *error){
 	for(;fgets(buffer, MAX_BUF_LEN, file_src);){
 		flag_label	=	0;
 		/* ignore empty line */
-		if(__get_nth_token(buffer, buffer_sub, 0)==error_token_not_get || buffer_sub[0]=='#')
+		if(__get_nth_token(buffer, buffer_sub, 0)==error_token_not_get)
 			continue;
 		/* has label */
 		if(buffer_sub[strlen(buffer_sub)-1]==':'){
@@ -217,41 +251,40 @@ error_t assembler_pretreatment(const char *src, FILE **temp_dst, Error *error){
 		if(strcmp(op_hash[hash_32(buffer_sub,HASH_SEED) & HASH_MASK].name, buffer_sub)==0){
 			Addr	*temp;
 			int i=0;
-			/* print into temp_dst */
-			for(i=0; i<flag_label+1; i++){
-				__get_nth_token(buffer, buffer_sub, i);
-				fprintf(*temp_dst," %s",buffer_sub);
-			}
-			for(i=0; __get_nth_token(buffer, buffer_sub, i+flag_label+1)==no_error && buffer[0]!= '#'; i++){
+			/* print the operator into temp_dst */
+			i	=	flag_label?1:0;
+			__get_nth_token(buffer, buffer_sub, i);
+			fprintf(file_dst,"\t%s",buffer_sub);
+			/* print the next argument */
+			for(i=0; __get_nth_token(buffer, buffer_sub, i+flag_label+1)==no_error; i++){
 				temp=addr_table[hash_32(buffer_sub,HASH_SEED) & HASH_MASK];
 				/* try to find the symbol in hash (whatever it is) */
-				for(temp=temp->next; temp!=NULL && strcmp(temp->symbol,buffer_sub); temp=temp->next);
+				for(temp=temp->next; temp!=NULL; temp=temp->next){
+					if(strcmp(temp->symbol,buffer_sub)==0)
+						break;
+				}
 				if(temp==NULL)
-					fprintf(*temp_dst, " %s", buffer_sub);
+					fprintf(file_dst, "\t%s", buffer_sub);
 				else
-					fprintf(*temp_dst, " %u", temp->addr);
-				fprintf(*temp_dst, "\n");
+					fprintf(file_dst, "\t%u", temp->addr);
 			}
+			fprintf(file_dst, "\n");
 		}
 		else
 			return error_how_could_it_be;
 	}
-	//-----------------
-	/* test: close the temp dst file */
-	fclose(*temp_dst);
-	//----------------
-	/* free the hash table */
+	fclose(file_src);
+	fclose(file_dst);
 	Addr *temp, *temp_shadow;
 	for(int i=0; i<HASH_MASK; i++){
 		temp		=	addr_table[i];
 		temp_shadow	=	temp;
 		for(;temp!=NULL;){
-			temp_shadow=temp,
-			temp=temp->next;
+			temp_shadow	=	temp;
+			temp		=	temp->next;
 			free(temp_shadow);
 		}
 	}
-
 	return no_error;
 }
 
@@ -266,6 +299,7 @@ static error_t __hash_store(const char *symbol, const uint32_t addr){
 	addr_temp		=	addr_temp->next;
 	strcpy(addr_temp->symbol,symbol);
 	addr_temp->addr	=	addr;
+	addr_temp->next	=	NULL;
 	return no_error;
 }
 
@@ -273,12 +307,11 @@ static error_t __hash_store(const char *symbol, const uint32_t addr){
 /* buffer must end with \n\0 */
 static error_t __get_nth_token(const char *buffer, char *buffer_sub, char n){
 	/* initialize the format string */
-	char *fmt	=	(char *)malloc(sizeof(char)*4*n);
+	char *fmt	=	(char *)malloc(sizeof(char)*4*(n+1));
 	fmt[0]		=	'\0';
 	for(int i=0; i<n; i++)
 		strcat(fmt, "%*s ");
 	strcat(fmt,"%s");
-
 	/* get the nth token */
 	if(sscanf(buffer,fmt,buffer_sub)!=1)
 		return	error_token_not_get;

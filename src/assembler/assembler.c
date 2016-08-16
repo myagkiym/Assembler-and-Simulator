@@ -28,22 +28,22 @@ const Op op_set[OP_NUM]={
 Op op_hash[HASH_MASK];
 
 error_t assembler_init(void){
-	memset(op_hash,0,sizeof(uint32_t)*HASH_MASK);
+	memset(op_hash,0,sizeof(Op)*HASH_MASK);
 	/* initialize the op_hash table */
 	for(int i=0; i<OP_NUM; i++)
 		op_hash[hash_32(op_set[i].name, HASH_SEED) & HASH_MASK]	=	op_set[i];
 	return no_error;
 }
 
-error_t assembler(const char *src, const char *dst){
-	/* open the necessary files */
-
-	/* do the pre-treatment*/
-
-	/* do the replacement */
-
-	return no_error;
-}
+//error_t assembler(const char *src, const char *dst){
+//	/* open the necessary files */
+//
+//	/* do the pre-treatment*/
+//
+//	/* do the replacement */
+//
+//	return no_error;
+//}
 
 
 //static error_t assembler_replacement(FILE *src, FILE *dst){
