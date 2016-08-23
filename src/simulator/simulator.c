@@ -32,18 +32,18 @@ error_t	simulator_init(void){
 
 error_t simulator(const char *path, Error *error){
 	error	=	error;
-	FILE	*file	=	fopen(path, "wb");
+	FILE	*file	=	fopen(path, "rb");
 	/* read the program into CS stack and set DS */
 	for(CS=0, DS=0; fread(&IR,sizeof(uint32_t),1,file); DS+=2){
 		mem[DS]		=	((IR & 0xFFFF0000)>>16);
 		mem[DS+1]	=	(IR & 0xFFFF);
 	}
-//	ES	=
+	ES	=   (1<<23);
 	SS	=	(1<<24);
 	for(;PC+=2;){
 		IR	=	((mem[PC]<<16) | mem[PC+1]);
         switch((IR & 0xF8000000)>>27){
-			case 0:		HLT();		break;
+			case 0:		HLT();	    goto halt;
 			case 1:		JMP();		break;
 			case 2:		CJMP();		break;
 			case 3: 	OJMP();		break;
@@ -59,6 +59,9 @@ error_t simulator(const char *path, Error *error){
  			case 11:	STOREW();	break;
  			case 12:	LOADI();	break;
  			case 13:	NOP();		break;
+
+ 			case 14:    IN();       break;
+ 			case 15:    OUT();      break;
 
  			case 16:	ADD();		break;
  			case 17:	ADDI();		break;

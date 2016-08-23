@@ -1,8 +1,6 @@
 #include "main.h"
 #include "assembler.h"
-//---------
-#include "assembler_pretreatment.h"
-//--------
+#include "simulator.h"
 #include "hash.h"
 #include "common.h"
 #include <string.h>
@@ -22,7 +20,11 @@ int main(void){
 
 	Error error;
 
-	printf("Error Code %d\n",assembler(a, b, &error));
+	printf("Assembler done, Error Code %d\n",assembler(a, b, &error));
+
+	simulator_init();
+
+	simulator(b, &error);
 
 	return	0;
 }

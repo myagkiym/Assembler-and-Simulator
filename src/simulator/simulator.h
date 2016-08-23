@@ -32,4 +32,7 @@ extern uint16_t PSW;
 /* judge if a number is a negative number */
 #define ISNEG(reg)  (((reg)&0x80000000)>>31)
 
+error_t simulator_init(void);
+
+error_t simulator(const char *path, Error *error);
 #endif // SIMULATOR_H_INCLUDED

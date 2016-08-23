@@ -1,8 +1,10 @@
 #include "assembler.h"
 #include "assembler_pretreatment.h"
+#include "assembler_replacement.h"
 #include "hash.h"
 #include "common.h"
 #include <string.h>
+#include <stdlib.h>
 
 /* the operator set */
 const Op op_set[OP_NUM]	=	{
