@@ -16,10 +16,6 @@ uint32_t data_stack[1<<24];
 /* function that stores the label or declaration in hash table*/
 static error_t __hash_store(const char *symbol, const uint32_t addr);
 
-/* get next token on buffer from *temp position */
-/* buffer must end with \n\0 and *temp must be on the buffer */
-static error_t __get_nth_token(const char *buffer, char *buffer_sub, char n);
-
 #define	__return_error(error_code)	\
 {strcpy(error->error_line,buffer);\
 error->error_pos	=	(char)(strstr(buffer,buffer_sub)-buffer);\
@@ -303,17 +299,3 @@ static error_t __hash_store(const char *symbol, const uint32_t addr){
 	return no_error;
 }
 
-/* get the Nth(start from 0) token on buffer */
-/* buffer must end with \n\0 */
-static error_t __get_nth_token(const char *buffer, char *buffer_sub, char n){
-	/* initialize the format string */
-	char *fmt	=	(char *)malloc(sizeof(char)*4*(n+1));
-	fmt[0]		=	'\0';
-	for(int i=0; i<n; i++)
-		strcat(fmt, "%*s ");
-	strcat(fmt,"%s");
-	/* get the nth token */
-	if(sscanf(buffer,fmt,buffer_sub)!=1)
-		return	error_token_not_get;
-	return no_error;
-}

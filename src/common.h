@@ -16,12 +16,16 @@ typedef char error_t;
 #define error_gramma_too_less_argument	0x09
 #define error_gramma_too_much_argument	0x0A
 #define error_gramma_declare_is_digit	0x0B
+#define error_gramma_reg_illegal		0x0C
 
+#define error_malloc					0x0D
 #define error_stack_overflow			0xFE
 
 #define error_how_could_it_be			0xFD
 typedef unsigned char	uint8_t;
+typedef unsigned short	uint16_t;
 typedef unsigned int	uint32_t;
+typedef short			int16_t;
 
 #define MAX_ERROR_STRLEN	200
 typedef struct _Error{

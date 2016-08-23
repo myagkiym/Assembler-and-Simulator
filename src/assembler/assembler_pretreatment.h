@@ -4,8 +4,6 @@
 #include "common.h"
 #include <stdio.h>
 
-/* the max length of the reading buffer*/
-#define MAX_BUF_LEN		500
 
 /* struct that stores the label/variable and its address */
 typedef struct _Addr{
