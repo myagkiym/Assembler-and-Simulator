@@ -16,7 +16,7 @@ inline void OJMP(void){
 }
 inline void CALL(void){
 	for(int i=0; i<8;ES++, i++)
-		mem[ES]		reg[i];
+		mem[ES]	=	reg[i];
 	mem[ES]	=	PSW,	ES++;
 	mem[ES]	=	PC,		ES++;
 	PC	=	IR&0x00FFFFFF;

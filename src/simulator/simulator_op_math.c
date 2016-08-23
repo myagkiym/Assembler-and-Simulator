@@ -19,7 +19,7 @@ inline void SUB(void){
 	UNSETO;
     REG0    =   REG1-REG2;
     /* if the sign of the two number is different and overflows */
-    if((ISNEG(reg1)^ISNEG(REG2) && (ISNEG(REG0)^ISNEG(REG1))) )
+    if((ISNEG(REG1)^ISNEG(REG2) && (ISNEG(REG0)^ISNEG(REG1))) )
         SETO;
 }
 inline void SUBI(void){

@@ -60,9 +60,6 @@ error_t simulator(const char *path, Error *error){
  			case 12:	LOADI();	break;
  			case 13:	NOP();		break;
 
- 			case 14:	IN();		break;
- 			case 15:	OUT();		break;
-
  			case 16:	ADD();		break;
  			case 17:	ADDI();		break;
  			case 18:	SUB();		break;

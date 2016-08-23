@@ -11,5 +11,5 @@ void SUBI(void);
 void MUL(void);
 void DIV(void);
 
-z
+
 #endif // SIMULATOR_OP_MATH_H_INCLUDED

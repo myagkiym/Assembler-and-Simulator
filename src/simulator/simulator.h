@@ -21,7 +21,7 @@ extern uint16_t PSW;
 #define SETC	(PSW|=0x0002)
 #define UNSETC	(PSW&=0xFFFD)
 #define GETC	((PSW&0x02)>>1)
-
+/* the the nth reg in the command */
 #define REG0	(reg[((IR & 0x07000000)>>24)])
 #define REG1	(reg[((IR & 0x00F00000)>>20)])
 #define REG2	(reg[((IR & 0x000F0000)>>16)])
