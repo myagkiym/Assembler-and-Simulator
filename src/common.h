@@ -36,6 +36,6 @@ typedef struct _Error{
 }Error;
 
 /* the length of data stack*/
-#define MAX_DATA_SPACE	2<<24
+#define MAX_DATA_SPACE	(1<<23)
 
 #endif // COMMON_H_INCLUDED

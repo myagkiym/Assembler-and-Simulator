@@ -9,6 +9,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+//============
+#include "assembler.h"
+extern Op op_set[32];
+//============
 /* memory */
 int16_t *mem;
 /* Z A B C D E F G */
@@ -20,6 +24,7 @@ uint32_t PC, IR;
 /* program status word */
 uint16_t PSW;
 
+/* distribute spaces and initialize the registers */
 error_t	simulator_init(void){
 	mem	=	(int16_t *)malloc(sizeof(int16_t)*(1<<24));
 	if(!mem)
@@ -29,19 +34,38 @@ error_t	simulator_init(void){
 	PSW	=	0;
 	return no_error;
 }
-
+/* free the spaces of the simulator*/
+error_t simulator_deinit(void){
+	free(mem);
+	return no_error;
+}
 error_t simulator(const char *path, Error *error){
 	error	=	error;
 	FILE	*file	=	fopen(path, "rb");
+
+	/* read the size of the data*/
+	fread(&ES, sizeof(uint32_t), 1, file);
+	/* set the pointer to the program part */
+	fseek(file, sizeof(int16_t)*ES+sizeof(uint32_t),SEEK_SET);
 	/* read the program into CS stack and set DS */
 	for(CS=0, DS=0; fread(&IR,sizeof(uint32_t),1,file); DS+=2){
 		mem[DS]		=	((IR & 0xFFFF0000)>>16);
 		mem[DS+1]	=	(IR & 0xFFFF);
 	}
-	ES	=   (1<<23);
+	fseek(file,sizeof(uint32_t),SEEK_SET);
+	/* load the predefined data */
+	for(uint32_t i=0; i<ES; i++)
+		fread(&mem[DS+i], sizeof(int16_t), 1, file);
+	ES	+=	DS;
 	SS	=	(1<<24);
-	for(;PC+=2;){
+	fclose(file);
+
+	/* run the simulator */
+	for(;;PC+=2){
 		IR	=	((mem[PC]<<16) | mem[PC+1]);
+//---------------
+//printf("%d : %s\n",PC/2, (op_set[(IR&0xFF000000)>>27]).name);
+//=-==========
         switch((IR & 0xF8000000)>>27){
 			case 0:		HLT();	    goto halt;
 			case 1:		JMP();		break;
@@ -84,6 +108,5 @@ error_t simulator(const char *path, Error *error){
          }
 	}
 	halt:
-	fclose(file);
 	return no_error;
 }

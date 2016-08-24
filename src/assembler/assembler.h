@@ -48,6 +48,4 @@ error_t assembler(const char *src, const char *dst, Error *error);
 /* buffer must end with \n\0 and *temp must be on the buffer */
 error_t __get_nth_token(const char *buffer, char *buffer_sub, char n);
 
-
-
 #endif // ASSEMBLER_H_INCLUDED

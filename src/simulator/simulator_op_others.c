@@ -3,10 +3,10 @@
 #include <stdio.h>
 
 void PUSH(void){
-	mem[SS++]	=	REG0;
+	mem[SS--]	=	REG0;
 }
 void POP(void){
-	REG0	=	mem[SS++];
+	REG0	=	mem[++SS];
 }
 void IN(void){
 	REG0	=	getchar();

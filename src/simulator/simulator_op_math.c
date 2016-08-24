@@ -32,7 +32,7 @@ inline void SUBI(void){
 inline void MUL(void){
     UNSETO;
     REG0    =   REG1*REG2;
-    if(REG0 / REG1 != REG2)
+    if(REG1!=0 && REG0/REG1 != REG2)
         SETO;
 }
 inline void DIV(void){

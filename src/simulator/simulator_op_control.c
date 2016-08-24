@@ -6,24 +6,24 @@ inline void HLT(void){
 	return;
 }
 inline void JMP(void){
-	PC	=	IR&0x00FFFFFF;
+	PC	=	(IR&0x00FFFFFF)-2;
 }
 inline void CJMP(void){
-	PC	=	GETC?(IR&0x00FFFFFF):PC;
+	PC	=	GETC?(IR&0x00FFFFFF)-2:PC;
 }
 inline void OJMP(void){
-	PC	=	GETO?(IR&0x00FFFFFF):PC;
+	PC	=	GETO?(IR&0x00FFFFFF)-2:PC;
 }
 inline void CALL(void){
-	for(int i=0; i<8;ES++, i++)
+	for(int i=0; i<8; ES++, i++)
 		mem[ES]	=	reg[i];
-	mem[ES]	=	PSW,	ES++;
-	mem[ES]	=	PC,		ES++;
-	PC	=	IR&0x00FFFFFF;
+	mem[ES]	=	PSW;	ES++;
+	mem[ES]	=	PC;		ES++;
+	PC	=	(IR&0x00FFFFFF)-2;
 }
 inline void RET(void){
-	PC	=	mem[ES],	ES--;
-	PSW	=	mem[ES],	ES--;
-	for(int i=0; i<8; ES--,i++)
-		reg[7-i]	=	mem[ES];
+	ES--;	PC	=	mem[ES];
+	ES--;	PSW	=	mem[ES];
+	for(int i=0; i<8; i++)
+		ES--, reg[7-i]	=	mem[ES];
 }

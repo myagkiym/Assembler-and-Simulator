@@ -11,7 +11,9 @@
 /* the hash table of label address */
 Addr *addr_table[HASH_MASK];
 /* the temporary data stack */
-uint32_t data_stack[1<<24];
+int16_t data_stack[MAX_DATA_SPACE];
+/* store the current reading address (metric: 2Byte) (for :LABEL) */
+uint32_t pc_addr	=	0;
 
 /* function that stores the label or declaration in hash table*/
 static error_t __hash_store(const char *symbol, const uint32_t addr);
@@ -54,7 +56,7 @@ error_t assembler_pretreatment_stage1(const char *src, const char *dst, Error *e
 		addr_table[i]->next	=	NULL;
 	}
 	/* initialize the temp data stack */
-	memset(data_stack,0,sizeof(uint32_t)*(1<<24));
+	memset(data_stack,0,sizeof(int16_t)*MAX_DATA_SPACE);
 
 	/* open necessary files */
 	FILE *file_src	=	fopen(src, "r");
@@ -67,8 +69,6 @@ error_t assembler_pretreatment_stage1(const char *src, const char *dst, Error *e
 	/* analyze the reading line */
 	char buffer_sub[MAX_BUF_LEN];
 
-	/* store the current reading address (metric: 2Byte) (for :LABEL) */
-	uint32_t pc_addr	=	0;
 	/* store the current data distribution address (metric: 2Byte) (relative addr, start from DS) */
 	uint32_t data_addr	=	0;
 	/* mark if this line has a label */
@@ -88,7 +88,7 @@ error_t assembler_pretreatment_stage1(const char *src, const char *dst, Error *e
 			/* store the label into hash table */
 			buffer_sub[strlen(buffer_sub)-1]	=	'\0';
 			/* if find duplicate symbol */
-			if(__hash_store(buffer_sub,pc_addr)==error_gramma_duplicate_symbol)
+			if(__hash_store(buffer_sub, pc_addr)==error_gramma_duplicate_symbol)
 				__return_error(error_gramma_duplicate_symbol);
 			/* get the next token */
 			if(__get_nth_token(buffer, buffer_sub, 1)==error_token_not_get){
@@ -116,16 +116,19 @@ error_t assembler_pretreatment_stage1(const char *src, const char *dst, Error *e
 			/* if the symbol is a keyword */
 			if(strcmp(op_hash[hash_32(buffer_sub, HASH_SEED) & HASH_MASK].name,buffer_sub)==0)
 				__return_error(error_gramma_declare_is_keyword);
-			/* store the symbol and judge if find duplicate symbol */
+			/* store the name and continue */
 			if(__hash_store(buffer_sub, data_addr)==error_gramma_duplicate_symbol)
 				__return_error(error_gramma_duplicate_symbol);
 
-			/* if it is a set */
+			/* if it is not a set */
 			if(__get_nth_token(temp, buffer_sub, 0)==error_token_not_get){
-				space = 1;
+				/* mark that it's not a set */
+				data_stack[data_addr]	=	1;
+				space = 2;
 				goto end;
 			}
 			temp	=	strstr(buffer, buffer_sub);
+			/* otherwise */
 			if(*temp=='['){
 				temp++;
 				for(; isspace(*temp); temp++);
@@ -135,11 +138,15 @@ error_t assembler_pretreatment_stage1(const char *src, const char *dst, Error *e
 				if(*temp != ']')
 					__return_error(error_gramma_declare_incomplete);
 				temp++;
+				/* mark that it's a set */
+				data_stack[data_addr]	=	space;
 			}
 
-			/* if already set the value */
-			if(__get_nth_token(temp, buffer_sub, 0)==error_token_not_get)
-				continue;
+			/* if not set the value */
+			if(__get_nth_token(temp, buffer_sub, 0)==error_token_not_get){
+				goto end;
+			}
+
 			temp	=	strstr(buffer, buffer_sub);
 			if(*temp=='='){
 				temp++;
@@ -150,7 +157,7 @@ error_t assembler_pretreatment_stage1(const char *src, const char *dst, Error *e
 					uint32_t data;
 					char fmt[MAX_BUF_LEN]	=	"%d";
 					for(;sscanf(temp,fmt,&data)==1 && counter<=space ;counter++){
-						data_stack[data_addr+counter]	=	data;
+						data_stack[data_addr+counter+1]	=	data;
 						fmt[0]	=	'\0';
 						for(int i=0; i<counter; i++)
 							strcat(fmt,"%*d");
@@ -165,12 +172,12 @@ error_t assembler_pretreatment_stage1(const char *src, const char *dst, Error *e
 					int counter	=	0;
 					temp++;
 					for(; *temp!='"' && counter <= space; temp++,counter++)
-						data_stack[data_addr+counter]	=	*temp;
+						data_stack[data_addr+counter+1]	=	*temp;
 					temp++;
 				}
 				/* if it's a number */
 				else if(isdigit(*temp)){
-					sscanf(temp, "%u", &data_stack[data_addr]);
+					sscanf(temp, "%hd", &data_stack[data_addr+1]);
 					for(; isdigit(*temp); temp++);
 				}
 				else
@@ -180,8 +187,8 @@ error_t assembler_pretreatment_stage1(const char *src, const char *dst, Error *e
 				__return_error(error_gramma_too_much_argument);
 
 			end:
-			/* distribute space */
-			data_addr+=space;
+			/* distribute space(relative addr ) */
+			data_addr+=(space+1);
 			if(data_addr>=MAX_DATA_SPACE)
 				return	error_stack_overflow;
 
@@ -193,6 +200,7 @@ error_t assembler_pretreatment_stage1(const char *src, const char *dst, Error *e
 			pc_addr	-=	2;
 			continue;	/* next line */
 		}
+
 		/* if is a keyword (test if the number of token is right ) */
 		if(strcmp(op_hash[hash_32(buffer_sub, HASH_SEED) & HASH_MASK].name,buffer_sub)==0){
 			int num=0, counter=0;
@@ -291,11 +299,11 @@ static error_t __hash_store(const char *symbol, const uint32_t addr){
 		if(!strcmp(addr_temp->next->symbol,symbol))
 			return error_gramma_duplicate_symbol;
 	/* store into the table */
-	addr_temp->next	=	malloc(sizeof(Addr));
-	addr_temp		=	addr_temp->next;
+	addr_temp->next		=	malloc(sizeof(Addr));
+	addr_temp			=	addr_temp->next;
 	strcpy(addr_temp->symbol,symbol);
-	addr_temp->addr	=	addr;
-	addr_temp->next	=	NULL;
+	addr_temp->addr		=	addr;
+	addr_temp->next		=	NULL;
 	return no_error;
 }
 

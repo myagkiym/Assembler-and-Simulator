@@ -11,11 +11,15 @@
 int main(void){
 	char a[1000];
 	char b[1000];
-	printf("input src file name ----->   ");
-	scanf("%s",a), getchar();
-	printf("input dst file name ----->   ");
-	scanf("%s",b), getchar();
+//	printf("input src file name ----->   ");
+//	scanf("%s",a), getchar();
+//	printf("input dst file name ----->   ");
+//	scanf("%s",b), getchar();
 
+//==============
+strcpy(a,"queen.txt");
+strcpy(b,"hello.s");
+//============
 	assembler_init();
 
 	Error error;

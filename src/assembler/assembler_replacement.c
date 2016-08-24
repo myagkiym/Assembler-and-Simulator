@@ -1,4 +1,5 @@
 #include "assembler.h"
+#include "assembler_pretreatment.h"
 #include "assembler_replacement.h"
 #include "common.h"
 #include "assembler.h"
@@ -32,6 +33,13 @@ error_t assembler_replacement(const char *src, const char *dst, Error *error){
 	Op			op_temp;
 	uint32_t	reg_value;
 
+	pc_addr++;
+	/* write the size of the data */
+	fwrite(&pc_addr, sizeof(uint32_t), 1, file_dst);
+	/* dump the predefined data into file */
+	for(uint32_t i=0; i<pc_addr; i++)
+		fwrite(&data_stack[i], sizeof(int16_t), 1, file_dst);
+	/* translate and write the commands */
 	for(; fgets(buffer, MAX_BUF_LEN, file_src);){
         __get_nth_token(buffer, buffer_sub, 0);
         op_temp = op_hash[hash_32(buffer_sub,HASH_SEED) & HASH_MASK];
