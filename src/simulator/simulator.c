@@ -60,25 +60,16 @@ error_t simulator(const char *path, Error *error){
 	SS	=	(1<<24)-1;
 	fclose(file);
 
-//============
-freopen("log.txt", "w", stdout);
-//------------
 	/* run the simulator */
 	for(;;PC+=2){
 		IR	=	((mem[PC]<<16) | mem[PC+1]);
-//------------
-
-static int counter	=	0;
-if(((IR & 0xF8000000)>>27)==4)
-printf("%d : %*s %s\n",PC/2, counter,"" , (op_set[(IR&0xFF000000)>>27]).name);
-//============
         switch((IR & 0xF8000000)>>27){
 			case 0:		HLT();	    goto halt;
 			case 1:		JMP();		break;
 			case 2:		CJMP();		break;
 			case 3: 	OJMP();		break;
-			case 4: 	CALL();	counter+=2;	break;
-			case 5:		RET();	counter-=2;	break;
+			case 4: 	CALL();		break;
+			case 5:		RET();		break;
 
 			case 6:		PUSH();		break;
 			case 7:		POP();		break;

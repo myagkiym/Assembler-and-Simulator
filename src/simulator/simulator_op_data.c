@@ -27,7 +27,7 @@ void STOREW(void){
 	mem[ADDR+reg[7]+DS+1]	=	REG0;
 }
 void LOADI(void){
-	REG0	=	IMMD;
+	REG0	=	IMMD&0xFF;
 }
 void NOP(void){
     return;

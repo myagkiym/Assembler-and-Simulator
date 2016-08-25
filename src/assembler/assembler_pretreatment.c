@@ -124,7 +124,7 @@ error_t assembler_pretreatment_stage1(const char *src, const char *dst, Error *e
 			if(__get_nth_token(temp, buffer_sub, 0)==error_token_not_get){
 				/* mark that it's not a set */
 				data_stack[data_addr]	=	1;
-				space = 2;
+				space = 1;
 				goto end;
 			}
 			temp	=	strstr(buffer, buffer_sub);
@@ -132,7 +132,7 @@ error_t assembler_pretreatment_stage1(const char *src, const char *dst, Error *e
 			if(*temp=='['){
 				temp++;
 				for(; isspace(*temp); temp++);
-				for(temp++ ;isdigit(*temp); temp++)
+				for(; isdigit(*temp); temp++)
 					space	=	space*10 + (*temp) - '0';
 				for(; isspace(*temp); temp++);
 				if(*temp != ']')
@@ -177,6 +177,7 @@ error_t assembler_pretreatment_stage1(const char *src, const char *dst, Error *e
 				}
 				/* if it's a number */
 				else if(isdigit(*temp)){
+					space	=	1;
 					sscanf(temp, "%hd", &data_stack[data_addr+1]);
 					for(; isdigit(*temp); temp++);
 				}
