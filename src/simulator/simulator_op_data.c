@@ -12,13 +12,13 @@ void LOADB(void){
 void LOADW(void){
 	/* if it's not a set or the length of the set is 1 */
 	if(mem[ADDR+DS]==1)
-		REG0	=	mem[ADDR+reg[7]+1];
+		REG0	=	mem[ADDR+DS+1];
 	/* otherwise if it's a set */
 	REG0	=	mem[ADDR+reg[7]+DS+1];
 }
 void STOREB(void){
 	if(mem[ADDR+DS]==1)
-			mem[ADDR+DS+1]	=	REG0 & 0xFF;
+		mem[ADDR+DS+1]	=	REG0 & 0xFF;
 	mem[ADDR+reg[7]+DS+1]	=	REG0 & 0xFF;
 }
 void STOREW(void){
