@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="Workspace">
+		<Project filename="Assembler/Assembler.cbp" />
+		<Project filename="Simulator/Simulator.cbp" />
+		<Project filename="User_interface/user_interface.cbp" />
+		<Project filename="../../NDDIMS/NDDIMS.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>

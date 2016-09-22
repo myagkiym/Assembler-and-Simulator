@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <!-- interface-requires gtk+ 3.0 -->
+  <object class="GtkFileChooserDialog" id="filechooserdialog_open">
+    <property name="can_focus">False</property>
+    <property name="border_width">5</property>
+    <property name="role">GtkFileChooserDialog</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="type_hint">dialog</property>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="filechooserdialog-vbox1">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="filechooserdialog-action_area1">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="button_ok">
+                <property name="label" translatable="yes">OK</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button2">
+                <property name="label" translatable="yes">Discard</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="1">button_ok</action-widget>
+      <action-widget response="2">button2</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkFileChooserDialog" id="filechooserdialog_save">
+    <property name="can_focus">False</property>
+    <property name="border_width">5</property>
+    <property name="role">GtkFileChooserDialog</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="type_hint">dialog</property>
+    <property name="action">save</property>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="filechooserdialog-vbox3">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="filechooserdialog-action_area3">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="button_ok1">
+                <property name="label" translatable="yes">OK</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button1">
+                <property name="label" translatable="yes">Discard</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="0">button_ok1</action-widget>
+      <action-widget response="0">button1</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-missing-image</property>
+  </object>
+  <object class="GtkImage" id="image2">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-missing-image</property>
+  </object>
+  <object class="GtkImage" id="image3">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-missing-image</property>
+  </object>
+  <object class="GtkWindow" id="window_main">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Assembler and Simulator</property>
+    <property name="resizable">False</property>
+    <property name="window_position">center</property>
+    <child>
+      <object class="GtkButtonBox" id="buttonbox1">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="layout_style">spread</property>
+        <child>
+          <object class="GtkButton" id="button_assembler">
+            <property name="label" translatable="yes">Assembler</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">image1</property>
+            <property name="image_position">top</property>
+            <signal name="released" handler="on_button_assembler_released" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="button_simulator">
+            <property name="label" translatable="yes">Simulator</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">image2</property>
+            <property name="image_position">top</property>
+            <signal name="released" handler="on_button_simulator_released" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="butto_about">
+            <property name="label" translatable="yes">About</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">image3</property>
+            <property name="image_position">top</property>
+            <signal name="released" handler="on_butto_about_released" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
