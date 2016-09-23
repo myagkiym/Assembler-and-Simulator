@@ -2,6 +2,8 @@
 #include <gtk.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
 
 GtkWidget *window_main;
 
@@ -48,7 +50,11 @@ G_MODULE_EXPORT void on_button_assembler_released(void){
 		strncpy(filename, gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser_dialog)), MAX_FILENAME_LEN);
 
         /* run the assembler */
-
+        pid_t	pid	=	fork();
+		if(pid == 0)
+			return;
+		else
+			execl()
 	}
 	return;
 }
